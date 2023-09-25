@@ -1,4 +1,14 @@
+"""pg.py -> Various hash functions
+Main user functions:
 
+
+constrain(InputVar: int, Min: int, Max: int) -> Constraints InputVar to within given range
+CoreHash(InputVar: str, Depth = 10) -> My Own Proprietary hash function
+hash(InputVar: int, Depth = 10, StringLength = 10) -> Expanded hash function to handle arbitrary length inputs
+rand(FunctionSeed = None, Min = 0, Max = 1000000) -> Random number generator with automatic seed update
+RandLen(FunctionSeed = None, Length = 25) -> Set length output random number generator
+RandStr(Length = 15, CharList = CharList) -> Random string generator using CharList as character set and set length
+"""
 import math as m
 import rshps as rp
 import time
@@ -9,6 +19,7 @@ RPL = len(rp.rshps)
 Seed = m.floor(time.time() * 1000)
 
 CharList = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+{}:|<>?"
+FullCharList = "FHZdk4a^s=$+~3%bE;pv:[cym9>BoD?K,'!XT0GQ5L(O<1U`N_qC{|Sh#eln}r2J8M*jg). -WfI]6/iz7\VP@tuYwRA&x"
 AlphaNumericList = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 #Function to constrain InputVar to be within range of Min to Max
@@ -35,9 +46,14 @@ def CoreHash(InputVar: str, Depth = 10):
 	return q[Depth-1]
 
 #Function to handle larger input sized without problems of converting to int
-def hash(InputVar: int, Depth = 10, StringLength = 10):
+def hash(InputVar: str, Depth = 10, StringLength = 10):
 	inputs = []
 	t = ""
+	
+	qs = 0
+	#If the length of the input is smaller than the partitioning length
+	if len(InputVar) < StringLength:
+		qs = CoreHash(InputVar, Depth)
 	
 	#Partition InputVar to appropriate sizes
 	for i, e in enumerate(InputVar):
@@ -50,7 +66,6 @@ def hash(InputVar: int, Depth = 10, StringLength = 10):
 		t += e
 	
 	#Compute final output
-	qs = 0
 	for i, e in enumerate(inputs):
 		qs += CoreHash(e, Depth)
 	
@@ -98,7 +113,7 @@ def RandLen(FunctionSeed = None, Length = 25):
 	return qq
 
 #My own random string generator with defined length for output
-def RandStr(Length = 15, CharList = CharList):
+def RandStr(Length = 15, CharList = FullCharList):
 	q = ""
 	
 	#Compute hash function based on character set CharList
@@ -106,3 +121,18 @@ def RandStr(Length = 15, CharList = CharList):
 		q += CharList[rand(None,0,len(CharList)-1)]
 	
 	return q
+
+def HashFile(path, Depth=10):
+	fh = open(path, "r")
+	lines = fh.readlines()
+	hashed_lines = []
+	for i, e in enumerate(lines):
+		char_code_line = ""
+		for ii, ee in enumerate(e):
+			char_code_line += str(ord(ee))
+		t = str(i) + char_code_line
+		hashed_lines.append(hash(t, Depth))
+	master_hash = ""
+	for e in hashed_lines:
+		master_hash += str(e)
+	return hashed_lines, hash(master_hash)
