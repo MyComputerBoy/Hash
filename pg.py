@@ -10,11 +10,11 @@ RandLen(FunctionSeed = None, Length = 25) -> Set length output random number gen
 RandStr(Length = 15, CharList = CharList) -> Random string generator using CharList as character set and set length
 """
 import math as m
-import rshps as rp
+import rpl as rp
 import time
 
-RPS = rp.rshps
-RPL = len(rp.rshps)
+RPS = rp.RandomisedPrimes
+RPL = len(rp.RandomisedPrimes)
 
 Seed = m.floor(time.time() * 1000)
 
@@ -63,6 +63,13 @@ def rand(FunctionSeed = None, Min = 0, Max = 1000000):
 	#Set new Seed
 	q = Seed = Hash(str(FunctionSeed + m.floor(time.time() * 1000))) * Hash(str(FunctionSeed + m.floor(time.time() * 11))) + Hash(str(FunctionSeed + m.floor(time.time())))
 	
+	DividingSize = 10**30
+	if Min > DividingSize:
+		while Min > DividingSize:
+			q *= rand(Seed, DividingSize, Max)
+			Min /= DividingSize
+	
+	# print("Min: %s, Max: %s" % (Min, Max))
 	return constrain(q, Min, Max)
 
 #my own Hash function with set length int output
@@ -111,8 +118,8 @@ def PopCharFromStr(index, string):
 #Scramble the whole character set string
 def ScrambleFullCharList(FullCharList = FullCharList):
 	q = ""
-	for i in range(len(FullCharList)-1):
-		t = rand(None, 1, len(FullCharList))
+	for i in range(len(FullCharList)):
+		t = rand(None, 0, len(FullCharList))
 		q += FullCharList[t]
 		FullCharList = PopCharFromStr(t, FullCharList)
 	return q
